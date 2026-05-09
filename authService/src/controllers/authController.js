@@ -3,13 +3,10 @@ import bcrypt from "bcryptjs";
 import AppError from "../utils/AppError.js";
 import catchAsync from "../utils/catchAsync.js";
 import generateAccessToken from "../utils/generateToken.js";
-export const register = catchAsync(async (req, res) => {
+export const register = catchAsync(async (req, res, next) => {
   const { email, password, nama, role } = req.body;
   if (!nama || !email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Nama, email, dan password wajib diisi.",
-    });
+    throw new AppError("Nama, email, password are required", 400);
   }
 
   const userRole = role || "user";
@@ -35,13 +32,17 @@ export const register = catchAsync(async (req, res) => {
   );
 
   const id = rows[0].id;
-
+  const token = generateAccessToken({ id, email, role });
   return res
     .status(201)
     .json({ success: true, message: "registration succcess", token });
 });
-export const login = catchAsync(async (req, res) => {
+
+export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    throw new AppError("Nama, email, password are required", 400);
+  }
   const [user] = await pool.execute("SELECT * from users WHERE email = ?", [
     email,
   ]);

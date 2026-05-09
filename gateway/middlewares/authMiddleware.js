@@ -1,21 +1,22 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.header.authorization;
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) {
+const authMiddleware = async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer "))
     return res
       .status(401)
-      .json({ success: false, message: "No token provided" });
-  }
-  jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
-    if (err) {
-      return res
-        .sttus(401)
-        .json({ success: false, message: "Invalid or Expired Token" });
-    }
-    req.user = decode;
+      .json({ success: false, message: "Token not found." });
+  try {
+    const payload = jwt.verify(header.split(" ")[1], process.env.JWT_SECRET);
+
+    // Inject data user ke header sebelum diteruskan ke service
+    req.headers["x-user-id"] = payload.id;
+    req.headers["x-user-role"] = payload.role;
+    req.headers["x-user-email"] = payload.email;
+
     next();
-  });
+  } catch {
+    return res.status(401).json({ success: false, message: "Invalid token." });
+  }
 };
 export default authMiddleware;
