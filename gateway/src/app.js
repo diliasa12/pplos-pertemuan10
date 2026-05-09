@@ -4,34 +4,28 @@ import authMiddleware from "./middlewares/authMiddleware.js";
 
 const app = express();
 const PORT = 4078;
-console.log(process.env.JWT_SECRET);
+app.use((req, res, next) => {
+  console.log(`[Gateway] ${req.method} ${req.url}`);
+  next();
+});
 app.use(
   "/service1",
   createProxyMiddleware({
     target: "http://localhost:4178",
     changeOrigin: true,
-    pathRewrite: { "/service1": "" },
+    pathRewrite: { "^/service1": "" },
   }),
 );
-app.use(authMiddleware);
+app.use("/service2", authMiddleware);
 app.use(
   "/service2",
-
   createProxyMiddleware({
     target: "http://localhost:4278",
     changeOrigin: true,
-    pathRewrite: { "/service2": "" },
+    pathRewrite: { "^/service2": "" },
   }),
 );
-app.use(
-  "/service3",
 
-  createProxyMiddleware({
-    target: "http://localhost:4378",
-    changeOrigin: true,
-    pathRewrite: { "/service3": "" },
-  }),
-);
 app.use((err, req, res, next) => {
   console.error(`[Gateway Error]`, err.message);
 
