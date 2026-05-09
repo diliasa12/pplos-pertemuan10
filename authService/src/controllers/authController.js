@@ -1,4 +1,5 @@
 import pool from "../db/connection.js";
+import { publish } from "../rabbitmq.js";
 import bcrypt from "bcryptjs";
 import AppError from "../utils/AppError.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -32,6 +33,7 @@ export const register = catchAsync(async (req, res, next) => {
   );
 
   const id = rows[0].id;
+  publish({ event: "user.registered", id, email });
   const token = generateAccessToken({ id, email, role });
   return res
     .status(201)

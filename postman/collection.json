@@ -1,0 +1,254 @@
+{
+  "info": {
+    "name": "StreamVault",
+    "_postman_id": "streamvault-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway_url", "value": "http://localhost:4078" },
+    { "key": "auth_prefix", "value": "/service1" },
+    { "key": "stream_prefix", "value": "/service2" },
+    { "key": "token_user", "value": "" },
+    { "key": "token_admin", "value": "" },
+    { "key": "movie_id", "value": "" },
+    { "key": "user_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{auth_prefix}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Budi Santoso\",\n  \"email\": \"budi@email.com\",\n  \"password\": \"rahasia123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{auth_prefix}}/api/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Super Admin\",\n  \"email\": \"admin@stream.id\",\n  \"password\": \"Admin@123\",\n  \"role\": \"admin\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) pm.collectionVariables.set('token_user', res.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{auth_prefix}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi@email.com\",\n  \"password\": \"rahasia123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) pm.collectionVariables.set('token_admin', res.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{auth_prefix}}/api/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@stream.id\",\n  \"password\": \"Admin@123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "Get All Movies (User)",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" }
+            ]
+          }
+        },
+        {
+          "name": "Get All Movies (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ]
+          }
+        },
+        {
+          "name": "Get Movie By Id",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies/{{movie_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" }
+            ]
+          }
+        },
+        {
+          "name": "Create Movie (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data?.id) pm.collectionVariables.set('movie_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Film Dokumenter Alam\",\n  \"type\": \"basic\",\n  \"Movie_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"thumbnail_url\": \"https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Premium Movie (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Film Premium Eksklusif\",\n  \"type\": \"premium\",\n  \"Movie_url\": \"https://www.youtube.com/watch?v=premium123\",\n  \"thumbnail_url\": \"https://img.youtube.com/vi/premium123/0.jpg\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Movie (Admin)",
+          "request": {
+            "method": "PUT",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies/{{movie_id}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Film Dokumenter Alam Updated\",\n  \"type\": \"basic\",\n  \"Movie_url\": \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\",\n  \"thumbnail_url\": \"https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Movie (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/movies/{{movie_id}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/subscriptions/my",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" }
+            ]
+          }
+        },
+        {
+          "name": "Upgrade to Premium",
+          "request": {
+            "method": "PATCH",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/subscriptions/upgrade",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" }
+            ]
+          }
+        },
+        {
+          "name": "Downgrade to Basic",
+          "request": {
+            "method": "PATCH",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/subscriptions/downgrade",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_user}}" }
+            ]
+          }
+        },
+        {
+          "name": "Get All Subscriptions (Admin)",
+          "request": {
+            "method": "GET",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/subscriptions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ]
+          }
+        },
+        {
+          "name": "Update Subscription By Admin",
+          "request": {
+            "method": "PATCH",
+            "url": "{{gateway_url}}{{stream_prefix}}/api/subscriptions/{{user_id}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"premium\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

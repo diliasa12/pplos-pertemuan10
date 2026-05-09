@@ -14,7 +14,7 @@ async function migrate() {
   await conn.execute(
     `CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME}\``,
   );
-  console.log(`✅ Database ${process.env.DB_NAME}`);
+  console.log(`Database ${process.env.DB_NAME}`);
   await conn.end();
   const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -25,7 +25,7 @@ async function migrate() {
     waitForConnections: true,
   });
 
-  console.log("🔄 Menjalankan migrasi...");
+  console.log("Menjalankan migrasi...");
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS users (
@@ -39,21 +39,21 @@ async function migrate() {
       UNIQUE KEY uq_users_email (email)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
-  console.log("✅ Tabel users");
+  console.log("Tabel users");
 
   await db.execute(`
-    CREATE TABLE IF NOT EXISTS videos (
+    CREATE TABLE IF NOT EXISTS movies (
       id            CHAR(36)                NOT NULL DEFAULT (UUID()),
       title         VARCHAR(200)            NOT NULL,
       type          ENUM('basic','premium') NOT NULL,
-      video_url     TEXT                    NOT NULL,
+      movie_url     TEXT                    NOT NULL,
       thumbnail_url TEXT,
       public_id     VARCHAR(255),
       created_at    TIMESTAMP               NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
-  console.log("✅ Tabel videos");
+  console.log("Tabel movies");
 
   await db.execute(`
     CREATE TABLE IF NOT EXISTS subscriptions (
@@ -65,7 +65,7 @@ async function migrate() {
       CONSTRAINT fk_sub_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
-  console.log("✅ Tabel subscriptions");
+  console.log("Tabel subscriptions");
 
   const [existing] = await db.execute("SELECT id FROM users WHERE email = ?", [
     "admin@stream.id",
@@ -84,16 +84,16 @@ async function migrate() {
       "INSERT INTO subscriptions (id, user_id, status) VALUES (?, ?, ?)",
       [subId, adminId, "premium"],
     );
-    console.log("✅ Seed admin (admin@stream.id / Admin@123)");
+    console.log("Seed admin (admin@stream.id / Admin@123)");
   } else {
-    console.log("⏭️  Admin sudah ada, skip seed");
+    console.log("Admin sudah ada, skip seed");
   }
 
   await db.end();
-  console.log("✅ Migrasi selesai");
+  console.log("Migrasi selesai");
 }
 
 migrate().catch((err) => {
-  console.error("❌ Migrasi gagal:", err.message);
+  console.error("Migrasi gagal:", err.message);
   process.exit(1);
 });
