@@ -1,10 +1,10 @@
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import authMiddleware from "./middlewares/authMiddleware.js";
-import roleCheck from "./middlewares/roleCheck.js";
+
 const app = express();
 const PORT = 4078;
-
+console.log(process.env.JWT_SECRET);
 app.use(
   "/service1",
   createProxyMiddleware({
@@ -13,10 +13,10 @@ app.use(
     pathRewrite: { "/service1": "" },
   }),
 );
-
+app.use(authMiddleware);
 app.use(
   "/service2",
-  roleCheck("admin"),
+
   createProxyMiddleware({
     target: "http://localhost:4278",
     changeOrigin: true,
@@ -25,7 +25,7 @@ app.use(
 );
 app.use(
   "/service3",
-  roleCheck("user"),
+
   createProxyMiddleware({
     target: "http://localhost:4378",
     changeOrigin: true,
