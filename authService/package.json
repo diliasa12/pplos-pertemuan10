@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate": "",
-    "dev": "nodemon index.js"
+    "migrate": "node src/db/migrate.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,7 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.22.3"
