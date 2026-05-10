@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "StreamVault",
-    "_postman_id": "streamvault-collection",
+    "name": "MoiveStreaming",
+    "_postman_id": "moviestreaming-collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
